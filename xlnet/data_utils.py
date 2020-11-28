@@ -32,7 +32,7 @@ special_symbols = {
     "<eop>"  : 8,
 }
 
-VOCAB_SIZE = 16000
+# VOCAB_SIZE = FLAGS.vocab_size
 UNK_ID = special_symbols["<unk>"]
 CLS_ID = special_symbols["<cls>"]
 SEP_ID = special_symbols["<sep>"]
@@ -48,7 +48,7 @@ def _float_feature(values):
   return tf.train.Feature(float_list=tf.train.FloatList(value=values))
 
 
-def format_filename(prefix, bsz_per_host, seq_len, bi_data, suffix,
+def format_filename(prefix, bsz_per_host, vocab_size, seq_len, bi_data, suffix,
                     mask_alpha=5, mask_beta=1, reuse_len=None, uncased=False,
                     fixed_num_predict=None):
   """docs."""
@@ -69,8 +69,8 @@ def format_filename(prefix, bsz_per_host, seq_len, bi_data, suffix,
   else:
     fnp_str = ""
 
-  file_name = "{}.bsz-{}.seqlen-{}.{}{}{}.alpha-{}.beta-{}.{}{}".format(
-      prefix, bsz_per_host, seq_len, reuse_len_str, uncased_str, bi_data_str,
+  file_name = "{}.bsz-{}.vocabsz-{}.seqlen-{}.{}{}{}.alpha-{}.beta-{}.{}{}".format(
+      prefix, bsz_per_host, vocab_size, seq_len, reuse_len_str, uncased_str, bi_data_str,
       mask_alpha, mask_beta, fnp_str, suffix)
 
   return file_name
@@ -188,7 +188,7 @@ def create_data(_):
   # Create and dump corpus_info from task 0
   if FLAGS.task == 0:
     corpus_info = {
-        "vocab_size": VOCAB_SIZE,
+        "vocab_size": FLAGS.vocab_size,
         "bsz_per_host": FLAGS.bsz_per_host,
         "num_core_per_host": FLAGS.num_core_per_host,
         "seq_len": FLAGS.seq_len,
@@ -225,6 +225,7 @@ def create_data(_):
   record_name = format_filename(
       prefix=record_prefix,
       bsz_per_host=FLAGS.bsz_per_host,
+      vocab_size = FLAGS.vocab_size,
       seq_len=FLAGS.seq_len,
       mask_alpha=FLAGS.mask_alpha,
       mask_beta=FLAGS.mask_beta,
@@ -421,6 +422,7 @@ def create_tfrecords(save_dir, basename, data, bsz_per_host, seq_len,
   file_name = format_filename(
       prefix=basename,
       bsz_per_host=bsz_per_host,
+      vocab_size = FLAGS.vocab_size,
       seq_len=seq_len,
       bi_data=bi_data,
       suffix="tfrecords",
@@ -763,6 +765,7 @@ def get_input_fn(
     tfrecord_dir,
     split,
     bsz_per_host,
+    vocab_size,
     seq_len,
     reuse_len,
     bi_data,
@@ -780,6 +783,7 @@ def get_input_fn(
   record_glob_base = format_filename(
       prefix="record_info-{}-*".format(split),
       bsz_per_host=bsz_per_host,
+      vocab_size = vocab_size,
       seq_len=seq_len,
       bi_data=bi_data,
       suffix="json",
@@ -883,6 +887,8 @@ if __name__ == "__main__":
   flags.DEFINE_integer("reuse_len", 256,
                        help="Number of token that can be reused as memory. "
                        "Could be half of `seq_len`.")
+  flags.DEFINE_integer("vocab_size", 16000, 
+                       help="define vocab size. Should be the same as vocab_size used to train a SentencePiece model")
   flags.DEFINE_bool("uncased", True, help="Use uncased inputs or not.")
   flags.DEFINE_bool("bi_data", True,
                     help="whether to create bidirectional data")

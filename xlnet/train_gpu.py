@@ -66,6 +66,8 @@ flags.DEFINE_integer("save_steps", default=None,
       help="number of steps for model checkpointing.")
 
 # Data config
+flags.DEFINE_integer("vocab_size", 16000, 
+                     help="define vocab size. Should be the same as vocab_size used to train a SentencePiece model")
 flags.DEFINE_integer('seq_len', default=0,
       help='Sequence length for pretraining.')
 flags.DEFINE_integer('reuse_len', default=0,
@@ -187,6 +189,7 @@ def train(ps_device):
       tfrecord_dir=FLAGS.record_info_dir,
       split="train",
       bsz_per_host=FLAGS.train_batch_size,
+      vocab_size = FLAGS.vocab_size,
       seq_len=FLAGS.seq_len,
       reuse_len=FLAGS.reuse_len,
       bi_data=FLAGS.bi_data,
@@ -315,7 +318,7 @@ def main(unused_argv):
   tf.logging.set_verbosity(tf.logging.INFO)
 
   # Get corpus info
-  FLAGS.n_token = data_utils.VOCAB_SIZE
+  FLAGS.n_token = FLAGS.vocab_size
   tf.logging.info("n_token {}".format(FLAGS.n_token))
 
   if not tf.gfile.Exists(FLAGS.model_dir):
