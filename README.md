@@ -20,10 +20,11 @@ We will be using Dialpad Support Calls are from `talkiq-data.ai_research.dialpad
     git clone https://github.com/matthiasdialpad/xlnet_pretrain.git
 
 3. Next, install the necessary packages with:
-
+    
+    cd xlnet_pretrain
     pip install -r requirements.txt
    
-Now, you should be able to run `lm_pretrain.ipynb`
+Now, you should be able to run `lm_pretrain_v1.ipynb`
 
 #### Overview to pretrain XLNet LM from scratch:
 1. Decide on dataset you want to pretrain XLNet on 
@@ -31,13 +32,14 @@ Now, you should be able to run `lm_pretrain.ipynb`
 3. Process the dataset with the trained SentencePiece tokenizer using `xlnet/data_utils.py` 
 4. We are now ready to pretrain an XLNet using `xlnet/train_gpu.py`
 
-## XLNet Folder
+## XLNet Folder - Changes/Fixes
 
-This folder is cloned directly from XLNet author's GitHub
+This folder is cloned directly from XLNet author's [GitHub](https://github.com/zihangdai/xlnet) with some modifications
 
     git clone https://github.com/zihangdai/xlnet.git
-    
-As of this writing, I made minor modifications in `data_utils.py`, assigning `vocab_size=16000` instead of 32000 used by the authors.
+
+* `data_utils.py` Added vocab_size to be a flag variable instead of being a fixed value. This `vocab_size` must be the same as the `vocab_size` when training a custom SentencePiece model 
+* `modelling.py: bsz%2==0 -> tf.debugging.assert_equal(bsz % 2, 0)` This is because bsz in `relative_positional_encoding` is inferred from the shape of the input which makes it a tensor and % is for integers not tensors, so we use tf's assert_equal instead
 
 #### CUDA
 1. Make sure you have a GPU that is available by using `nvidia-smi` in terminal
