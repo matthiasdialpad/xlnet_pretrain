@@ -33,6 +33,7 @@ Now, you should be able to run `lm_pretrain_v1.ipynb`
 4. We are now ready to pretrain an XLNet using `xlnet/train_gpu.py`
 
 `train_sentencepiece.txt` is used when training a custom Sentence Piece tokenizer model
+
 `lm_pretrain.txt` is used when pretraining a XLNet LM that is formatted according to the original author's recommendation. Specifically, this is their instruction:
 
 The input text files to `data_utils.py` must use the following format:
