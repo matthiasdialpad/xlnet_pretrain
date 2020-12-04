@@ -32,6 +32,25 @@ Now, you should be able to run `lm_pretrain_v1.ipynb`
 3. Process the dataset with the trained SentencePiece tokenizer using `xlnet/data_utils.py` 
 4. We are now ready to pretrain an XLNet using `xlnet/train_gpu.py`
 
+`train_sentencepiece.txt` is used when training a custom Sentence Piece tokenizer model
+`lm_pretrain.txt` is used when pretraining a XLNet LM that is formatted according to the original author's recommendation. Specifically, this is their instruction:
+
+The input text files to `data_utils.py` must use the following format:
+* Each line is a sentence.
+* An empty line means End of Document.
+* (Optional) If one also wants to model paragraph structures, `<eop>` can be inserted at the end of certain lines (without any space) to indicate that the corresponding sentence ends a paragraph.
+
+For example, the text input file could be:
+```
+This is the first sentence.
+This is the second sentence and also the end of the paragraph.<eop>
+Another paragraph.
+
+Another document starts here.
+```
+
+`spiece.model` is the trained sentencepiece model, an output of `spm.SentencePieceTrainer.train()`. The `spiece.model` in `dialpad_xlnet_16000` is trained on dialpad data with a vocab size of 16,000 while the `spiece.model` in `dialpad_xlnet_320000` is the original model from the authors (same one used by HuggingFace)
+``
 ## XLNet Folder - Changes/Fixes
 
 This folder is cloned directly from XLNet author's [GitHub](https://github.com/zihangdai/xlnet) with some modifications
@@ -41,7 +60,7 @@ This folder is cloned directly from XLNet author's [GitHub](https://github.com/z
 * `data_utils.py` Added vocab_size to be a flag variable instead of being a fixed value. This `vocab_size` must be the same as the `vocab_size` when training a custom SentencePiece model 
 * `modelling.py: bsz%2==0 -> tf.debugging.assert_equal(bsz % 2, 0)` This is because bsz in `relative_positional_encoding` is inferred from the shape of the input which makes it a tensor and % is for integers not tensors, so we use tf's assert_equal instead
 
-#### CUDA
+## CUDA
 1. Make sure you have a GPU that is available by using `nvidia-smi` in terminal
 2. Make sure tensorflow recognizes ur GPU as well. You can do this with:
 ```    
